@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "design_rules_file": "rules/design-rules.json",
+  "source_documents": [
+    "docs/prd.md",
+    "docs/design.md",
+    "docs/story-service.md",
+    "docs/story-work.md"
+  ],
+  "required_context_files": [
+    "AGENTS.md",
+    ".codex/config.toml",
+    ".codex/hooks.json",
+    ".codex/skills/run-design-harness/SKILL.md",
+    ".codex/skills/run-design-harness/references/roles.md",
+    "harness/defaults.yaml",
+    "harness/guides/figma-design-guide.md",
+    "harness/r2-purpose.md",
+    "harness/r3-pipeline.md",
+    "harness/r4-artifacts.md",
+    "harness/r5-gates.md",
+    "harness/r6-roles.md",
+    "harness/r7-orchestrator.md",
+    "harness/r8-validation.md",
+    "harness/templates/01-reference-analysis.md",
+    "harness/templates/02-screen-spec.md",
+    "harness/templates/03-key-screens.md",
+    "harness/templates/04-design-output.md",
+    "harness/scripts/orchestrate.py",
+    "harness/scripts/guard_write.py",
+    "harness/scripts/guard_judge.py",
+    "rules/design-rules.json"
+  ],
+  "run_id_pattern": "^[0-9]{8}-[0-9]{4}-[^/]+$",
+  "status_values": ["pending", "in_progress", "waiting_approval", "passed", "failed"],
+  "max_retries_per_stage": 2,
+  "categories": [
+    "디자인·프로토타이핑",
+    "개발·배포",
+    "자동화·연동",
+    "콘텐츠 제작",
+    "생산성·협업",
+    "리서치·데이터",
+    "미분류"
+  ],
+  "service_invariants": [
+    { "field": "unknown_category_count", "operator": "eq", "value": 0, "message": "등록되지 않은 카테고리를 사용할 수 없습니다." },
+    { "field": "unverified_fact_count", "operator": "eq", "value": 0, "message": "확인되지 않은 설명이나 URL을 사실로 기록할 수 없습니다." }
+  ],
+  "stages": {
+    "1": {
+      "name": "레퍼런스 분석",
+      "artifact": "01-reference-analysis.md",
+      "format": "markdown_frontmatter",
+      "required_metadata": ["references", "missing_source_count", "reflection_candidates", "unknown_category_count", "unverified_fact_count"],
+      "gates": [
+        { "field": "references", "operator": "gte", "value": 1 },
+        { "field": "missing_source_count", "operator": "eq", "value": 0 },
+        { "field": "reflection_candidates", "operator": "gte", "value": 1 }
+      ],
+      "return_stage": 1
+    },
+    "2": {
+      "name": "화면 설계",
+      "artifact": "02-screen-spec.md",
+      "format": "markdown_frontmatter",
+      "required_metadata": ["planned_key_screens", "missing_required_sections", "unknown_category_count", "unverified_fact_count"],
+      "gates": [
+        { "field": "planned_key_screens", "operator": "between", "min": 2, "max": 3 },
+        { "field": "missing_required_sections", "operator": "eq", "value": 0 }
+      ],
+      "return_stage": 2
+    },
+    "3": {
+      "name": "키스크린 제작",
+      "artifact": "03-key-screens.md",
+      "format": "markdown_frontmatter",
+      "required_metadata": ["key_screens", "frame_width", "frame_height", "unknown_category_count", "unverified_fact_count"],
+      "gates": [
+        { "field": "key_screens", "operator": "between", "min": 2, "max": 3 },
+        { "field": "frame_width", "operator": "eq_rule", "rule": "reference_frames.mobile.width" },
+        { "field": "frame_height", "operator": "eq_rule", "rule": "reference_frames.mobile.height" }
+      ],
+      "return_stage": 3
+    },
+    "4": {
+      "name": "디자인 제작",
+      "artifact": "04-design-output.md",
+      "format": "markdown_frontmatter",
+      "required_metadata": [
+        "used_color_values",
+        "used_radii_px",
+        "shadow_count",
+        "decorative_gradient_count",
+        "minimum_touch_target_px",
+        "mobile_input_font_size_px",
+        "letter_spacing",
+        "unknown_category_count",
+        "unverified_fact_count"
+      ],
+      "gates": [
+        { "field": "used_color_values", "operator": "subset_rule", "rule": "colors.allowed_values" },
+        { "field": "used_radii_px", "operator": "subset_rule", "rule": "shapes.allowed_radii_px" },
+        { "field": "shadow_count", "operator": "eq_rule", "rule": "forbidden.shadow_count" },
+        { "field": "decorative_gradient_count", "operator": "eq_rule", "rule": "forbidden.decorative_gradient_count" },
+        { "field": "minimum_touch_target_px", "operator": "gte_rule", "rule": "interaction.minimum_touch_target_px" },
+        { "field": "mobile_input_font_size_px", "operator": "gte_rule", "rule": "typography.mobile_input_min_size_px" },
+        { "field": "letter_spacing", "operator": "eq_rule", "rule": "typography.default_letter_spacing" }
+      ],
+      "return_stage": 4
+    },
+    "5": {
+      "name": "가이드 검토",
+      "artifact": "05-guide-check.json",
+      "format": "json",
+      "required_metadata": ["checked_rules", "total_rules", "failed_rules", "unresolved_violations", "judge_write_attempts"],
+      "gates": [
+        { "field": "total_rules", "operator": "gte", "value": 1 },
+        { "field": "checked_rules", "operator": "eq_field", "other_field": "total_rules" },
+        { "field": "failed_rules", "operator": "eq", "value": 0 },
+        { "field": "unresolved_violations", "operator": "eq", "value": 0 },
+        { "field": "judge_write_attempts", "operator": "eq", "value": 0 }
+      ],
+      "return_stage": 4
+    }
+  }
+}

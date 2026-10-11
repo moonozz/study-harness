@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "skill": "run-design-harness",
+  "state_file": "state.json",
+  "approval_file": "approval.md",
+  "active_run_file": ".active.json",
+  "stage_roles": {
+    "1": "research-agent",
+    "2": "screen-agent",
+    "3": "design-agent",
+    "4": "design-agent",
+    "5": "judge-agent"
+  },
+  "role_edit_roots": {
+    "research-agent": ["agents/research"],
+    "screen-agent": ["agents/screen"],
+    "design-agent": ["agents/design"],
+    "judge-agent": [],
+    "orchestrator": ["."]
+  },
+  "stage_sources": {
+    "1": "agents/research/01-reference-analysis.md",
+    "2": "agents/screen/02-screen-spec.md",
+    "3": "agents/design/03-key-screens.md",
+    "4": "agents/design/04-design-output.md"
+  },
+  "stage_outputs": {
+    "1": "01-reference-analysis.md",
+    "2": "02-screen-spec.md",
+    "3": "03-key-screens.md",
+    "4": "04-design-output.md",
+    "5": "05-guide-check.json"
+  }
+}

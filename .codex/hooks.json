@@ -1,0 +1,49 @@
+{
+  "description": "Project-local enforcement for the staged design harness.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 harness/scripts/session_context.py",
+            "additionalContextLimit": 1200,
+            "statusMessage": "Loading design harness context"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 harness/scripts/guard_write.py",
+            "timeout": 10,
+            "statusMessage": "Checking harness write scope"
+          },
+          {
+            "type": "command",
+            "command": "python3 harness/scripts/guard_judge.py",
+            "timeout": 10,
+            "statusMessage": "Checking judge read-only policy"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 harness/scripts/stop_guard.py",
+            "timeout": 10,
+            "statusMessage": "Checking active harness stage"
+          }
+        ]
+      }
+    ]
+  }
+}

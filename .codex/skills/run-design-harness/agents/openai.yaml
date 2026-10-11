@@ -1,0 +1,4 @@
+interface:
+  display_name: "Run Design Harness"
+  short_description: "Run the staged reference-to-UI design workflow"
+  default_prompt: "Use $run-design-harness to start or resume the repository design harness."
